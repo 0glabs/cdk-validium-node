@@ -14,11 +14,16 @@ import (
 
 const unexpectedHashTemplate = "missmatch on transaction data for batch num %d. Expected hash %s, actual hash: %s"
 
+type BlobRequestParams struct {
+	BatchHeaderHash []byte
+	BlobIndex       uint32
+}
+
 // DataAvailability implements an abstract data availability integration
 type DataAvailability struct {
 	isTrustedSequencer bool
 
-	state       stateInterface
+	state       StateInterface
 	zkEVMClient ZKEVMClientTrustedBatchesGetter
 	backend     DABackender
 
@@ -29,7 +34,7 @@ type DataAvailability struct {
 func New(
 	isTrustedSequencer bool,
 	backend DABackender,
-	state stateInterface,
+	state StateInterface,
 	zkEVMClient ZKEVMClientTrustedBatchesGetter,
 ) (*DataAvailability, error) {
 	da := &DataAvailability{
@@ -47,20 +52,22 @@ func New(
 // as expected by the contract
 func (d *DataAvailability) PostSequence(ctx context.Context, sequences []types.Sequence) ([]byte, error) {
 	batchesData := [][]byte{}
+	batchesNumber := []uint64{}
 	for _, batch := range sequences {
 		// Do not send to the DA backend data that will be stored to L1
 		if batch.ForcedBatchTimestamp == 0 {
 			batchesData = append(batchesData, batch.BatchL2Data)
+			batchesNumber = append(batchesNumber, batch.BatchNumber)
 		}
 	}
-	return d.backend.PostSequence(ctx, batchesData)
+	return d.backend.PostSequence(ctx, batchesData, batchesNumber, d.state)
 }
 
 // GetBatchL2Data tries to return the data from a batch, in the following priorities
 // 1. From local DB
 // 2. From Sequencer
 // 3. From DA backend
-func (d *DataAvailability) GetBatchL2Data(batchNum uint64, expectedTransactionsHash common.Hash) ([]byte, error) {
+func (d *DataAvailability) GetBatchL2Data(batchNum uint64, expectedTransactionsHash common.Hash, requestParams []BlobRequestParams) ([]byte, error) {
 	found := true
 	transactionsData, err := d.state.GetBatchL2DataByNumber(d.ctx, batchNum, nil)
 	if err != nil {
@@ -87,7 +94,7 @@ func (d *DataAvailability) GetBatchL2Data(batchNum uint64, expectedTransactionsH
 		}
 
 		log.Info("trying to get data from the data availability backend")
-		data, err := d.backend.GetBatchL2Data(batchNum, expectedTransactionsHash)
+		data, err := d.backend.GetBatchL2Data(batchNum, expectedTransactionsHash, requestParams)
 		if err != nil {
 			log.Error("failed to get data from the data availability backend: %w", err)
 			if d.isTrustedSequencer {
@@ -113,4 +120,8 @@ func (d *DataAvailability) getDataFromTrustedSequencer(batchNum uint64, expected
 		)
 	}
 	return b.BatchL2Data, nil
+}
+
+func (d *DataAvailability) GetDaBackendType() DABackendType {
+	return d.backend.GetDaBackendType()
 }

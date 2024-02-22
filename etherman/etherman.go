@@ -38,6 +38,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/rpc"
 	"golang.org/x/crypto/sha3"
 )
@@ -1295,10 +1296,34 @@ func decodeSequences(txData []byte, lastBatchNumber uint64, sequencer common.Add
 			return nil, err
 		}
 		coinbase := (data[1]).(common.Address)
+
+		var blobRequestParams [][]dataavailability.BlobRequestParams
+		useZgDa := false
+
+		if da.GetDaBackendType() == dataavailability.DataAvailabilityZg {
+			useZgDa = true
+
+			message, err := json.Marshal(data[2])
+			if err != nil {
+				return nil, err
+			}
+
+			err = rlp.DecodeBytes(message, &blobRequestParams)
+			if err != nil {
+				return nil, err
+			}
+		}
+
 		sequencedBatches := make([]SequencedBatch, len(sequencesValidium))
 		for i, seq := range sequencesValidium {
 			bn := lastBatchNumber - uint64(len(sequencesValidium)-(i+1))
-			batchL2Data, err := da.GetBatchL2Data(bn, sequencesValidium[i].TransactionsHash)
+
+			var requestParams []dataavailability.BlobRequestParams
+			if useZgDa {
+				requestParams = blobRequestParams[i]
+			}
+
+			batchL2Data, err := da.GetBatchL2Data(bn, sequencesValidium[i].TransactionsHash, requestParams)
 			if err != nil {
 				return nil, err
 			}

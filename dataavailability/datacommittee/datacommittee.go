@@ -11,6 +11,7 @@ import (
 
 	"github.com/0xPolygon/cdk-data-availability/client"
 	daTypes "github.com/0xPolygon/cdk-data-availability/types"
+	"github.com/0xPolygonHermez/zkevm-node/dataavailability"
 	"github.com/0xPolygonHermez/zkevm-node/etherman/smartcontracts/polygondatacommittee"
 	"github.com/0xPolygonHermez/zkevm-node/log"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -88,7 +89,7 @@ func (d *DataCommitteeBackend) Init() error {
 }
 
 // GetBatchL2Data returns the data from the DAC. It checks that it matches with the expected hash
-func (d *DataCommitteeBackend) GetBatchL2Data(batchNum uint64, hash common.Hash) ([]byte, error) {
+func (d *DataCommitteeBackend) GetBatchL2Data(batchNum uint64, hash common.Hash, requestParams []dataavailability.BlobRequestParams) ([]byte, error) {
 	intialMember := d.selectedCommitteeMember
 	found := false
 	for !found && intialMember != -1 {
@@ -130,6 +131,10 @@ func (d *DataCommitteeBackend) GetBatchL2Data(batchNum uint64, hash common.Hash)
 	return nil, fmt.Errorf("couldn't get the data from any committee member")
 }
 
+func (d *DataCommitteeBackend) GetDaBackendType() dataavailability.DABackendType {
+	return dataavailability.DataAvailabilityCommittee
+}
+
 type signatureMsg struct {
 	addr      common.Address
 	signature []byte
@@ -138,7 +143,7 @@ type signatureMsg struct {
 
 // PostSequence sends the sequence data to the data availability backend, and returns the dataAvailabilityMessage
 // as expected by the contract
-func (s *DataCommitteeBackend) PostSequence(ctx context.Context, batchesData [][]byte) ([]byte, error) {
+func (s *DataCommitteeBackend) PostSequence(ctx context.Context, batchesData [][]byte, batchesNumber []uint64, state dataavailability.StateInterface) ([]byte, error) {
 	// Get current committee
 	committee, err := s.getCurrentDataCommittee()
 	if err != nil {

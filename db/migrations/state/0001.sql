@@ -164,3 +164,10 @@ CREATE TABLE state.debug
     timestamp timestamp,
     payload VARCHAR  
 );
+
+CREATE TABLE state.blobs
+(
+    batch_num BIGINT PRIMARY KEY,
+    blob_request_params VARCHAR,
+    blob_status_reply VARCHAR
+);

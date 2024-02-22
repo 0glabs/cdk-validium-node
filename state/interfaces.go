@@ -158,4 +158,5 @@ type storage interface {
 	IsBatchChecked(ctx context.Context, batchNum uint64, dbTx pgx.Tx) (bool, error)
 	UpdateBatchAsChecked(ctx context.Context, batchNumber uint64, dbTx pgx.Tx) error
 	GetNotCheckedBatches(ctx context.Context, dbTx pgx.Tx) ([]*Batch, error)
+	AddCommitment(ctx context.Context, batchNum uint64, blobRequestParams string, blobStatusReply string, dbTx pgx.Tx) error
 }

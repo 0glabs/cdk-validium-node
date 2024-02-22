@@ -368,3 +368,14 @@ func (p *PostgresStorage) GetBatchL2DataByNumber(ctx context.Context, batchNumbe
 	}
 	return batchL2Data, nil
 }
+
+func (p *PostgresStorage) AddCommitment(ctx context.Context, batchNum uint64, blobRequestParams string, blobStatusReply string, dbTx pgx.Tx) error {
+	const insertDaBlobInfoSQL = `
+        INSERT INTO state.blobs (batch_num, blob_request_params, blob_status_reply)
+                                 VALUES ($1, $2, $3)`
+
+	e := p.getExecQuerier(dbTx)
+	_, err := e.Exec(ctx, insertDaBlobInfoSQL, batchNum, blobRequestParams, blobStatusReply)
+
+	return err
+}

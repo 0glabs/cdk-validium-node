@@ -21,6 +21,7 @@ import (
 	"github.com/0xPolygonHermez/zkevm-node/config"
 	"github.com/0xPolygonHermez/zkevm-node/dataavailability"
 	"github.com/0xPolygonHermez/zkevm-node/dataavailability/datacommittee"
+	"github.com/0xPolygonHermez/zkevm-node/dataavailability/zg"
 	"github.com/0xPolygonHermez/zkevm-node/db"
 	"github.com/0xPolygonHermez/zkevm-node/etherman"
 	"github.com/0xPolygonHermez/zkevm-node/ethtxmanager"
@@ -349,6 +350,16 @@ func newDataAvailability(c config.Config, st *state.State, etherman *etherman.Cl
 			pk,
 			dataCommitteeClient.NewFactory(),
 		)
+		if err != nil {
+			return nil, err
+		}
+	case string(dataavailability.DataAvailabilityZg):
+		zgCfg := zg.ZgConfig{
+			Enable:  true,
+			Address: c.ZgDaAddress,
+		}
+
+		daBackend, err = zg.NewZgDA(zgCfg)
 		if err != nil {
 			return nil, err
 		}
