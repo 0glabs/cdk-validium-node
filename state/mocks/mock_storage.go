@@ -130,6 +130,56 @@ func (_c *StorageMock_AddBlock_Call) RunAndReturn(run func(context.Context, *sta
 	return _c
 }
 
+// AddCommitment provides a mock function with given fields: ctx, batchNum, blobRequestParams, blobStatusReply, dbTx
+func (_m *StorageMock) AddCommitment(ctx context.Context, batchNum uint64, blobRequestParams string, blobStatusReply string, dbTx pgx.Tx) error {
+	ret := _m.Called(ctx, batchNum, blobRequestParams, blobStatusReply, dbTx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for AddCommitment")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint64, string, string, pgx.Tx) error); ok {
+		r0 = rf(ctx, batchNum, blobRequestParams, blobStatusReply, dbTx)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// StorageMock_AddCommitment_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'AddCommitment'
+type StorageMock_AddCommitment_Call struct {
+	*mock.Call
+}
+
+// AddCommitment is a helper method to define mock.On call
+//   - ctx context.Context
+//   - batchNum uint64
+//   - blobRequestParams string
+//   - blobStatusReply string
+//   - dbTx pgx.Tx
+func (_e *StorageMock_Expecter) AddCommitment(ctx interface{}, batchNum interface{}, blobRequestParams interface{}, blobStatusReply interface{}, dbTx interface{}) *StorageMock_AddCommitment_Call {
+	return &StorageMock_AddCommitment_Call{Call: _e.mock.On("AddCommitment", ctx, batchNum, blobRequestParams, blobStatusReply, dbTx)}
+}
+
+func (_c *StorageMock_AddCommitment_Call) Run(run func(ctx context.Context, batchNum uint64, blobRequestParams string, blobStatusReply string, dbTx pgx.Tx)) *StorageMock_AddCommitment_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(uint64), args[2].(string), args[3].(string), args[4].(pgx.Tx))
+	})
+	return _c
+}
+
+func (_c *StorageMock_AddCommitment_Call) Return(_a0 error) *StorageMock_AddCommitment_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *StorageMock_AddCommitment_Call) RunAndReturn(run func(context.Context, uint64, string, string, pgx.Tx) error) *StorageMock_AddCommitment_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // AddForcedBatch provides a mock function with given fields: ctx, forcedBatch, tx
 func (_m *StorageMock) AddForcedBatch(ctx context.Context, forcedBatch *state.ForcedBatch, tx pgx.Tx) error {
 	ret := _m.Called(ctx, forcedBatch, tx)

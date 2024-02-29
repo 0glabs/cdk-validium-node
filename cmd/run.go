@@ -326,6 +326,7 @@ func newDataAvailability(c config.Config, st *state.State, etherman *etherman.Cl
 	if err != nil {
 		return nil, fmt.Errorf("error getting data availability protocol name: %v", err)
 	}
+	log.Info("da protocol name ", daProtocolName)
 	var daBackend dataavailability.DABackender
 	switch daProtocolName {
 	case string(dataavailability.DataAvailabilityCommittee):
@@ -355,8 +356,9 @@ func newDataAvailability(c config.Config, st *state.State, etherman *etherman.Cl
 		}
 	case string(dataavailability.DataAvailabilityZg):
 		zgCfg := zg.ZgConfig{
-			Enable:  true,
-			Address: c.ZgDaAddress,
+			Enable:      true,
+			Address:     c.ZgDaAddress,
+			MaxBlobSize: int(c.MaxBlobSize),
 		}
 
 		daBackend, err = zg.NewZgDA(zgCfg)

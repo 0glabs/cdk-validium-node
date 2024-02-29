@@ -78,7 +78,7 @@ func (s *ZgDA) PostSequence(ctx context.Context, batchesData [][]byte, batchesNu
 
 		requestParams := make([]dataavailability.BlobRequestParams, 0)
 		if totalBlobSize > 0 {
-			log.Warnf("BatchL2Data %s", seq)
+			log.Infof("BatchL2Data %s, len %d", seq, totalBlobSize)
 
 			for idx := 0; idx < totalBlobSize; idx += s.Cfg.MaxBlobSize {
 				var endIdx int
@@ -99,6 +99,7 @@ func (s *ZgDA) PostSequence(ctx context.Context, batchesData [][]byte, batchesNu
 					},
 				}
 
+				log.Infof("Disperse blob range %d %d", idx, endIdx)
 				blobReply, err := s.Client.DisperseBlob(ctx, &blob)
 				if err != nil {
 					log.Warn("Disperse blob error", "err", err)
@@ -106,6 +107,7 @@ func (s *ZgDA) PostSequence(ctx context.Context, batchesData [][]byte, batchesNu
 				}
 
 				requestId := blobReply.GetRequestId()
+				log.Infof("Disperse request id %s", requestId)
 				for {
 					statusReply, err := s.Client.GetBlobStatus(ctx, &pb.BlobStatusRequest{RequestId: requestId})
 
@@ -113,6 +115,7 @@ func (s *ZgDA) PostSequence(ctx context.Context, batchesData [][]byte, batchesNu
 						log.Warn("Get blob status error", "err", err)
 						return nil, err
 					}
+					log.Infof("status reply %s", statusReply)
 
 					if statusReply.GetStatus() == pb.BlobStatus_CONFIRMED {
 						blobInfo := statusReply.GetInfo()
@@ -149,7 +152,6 @@ func (s *ZgDA) PostSequence(ctx context.Context, batchesData [][]byte, batchesNu
 			state.AddCommitment(ctx, batchesNumber[i], string(blobRequestParams), string(blobStatusReply), nil)
 			message = append(message, requestParams)
 		}
-
 	}
 
 	rlpEncode, err := rlp.EncodeToBytes(&message)

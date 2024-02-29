@@ -1,4 +1,4 @@
-DOCKERCOMPOSE := docker-compose -f docker-compose.yml
+DOCKERCOMPOSE := docker compose -f docker-compose.yml
 DOCKERCOMPOSEAPPSEQ := zkevm-sequencer
 DOCKERCOMPOSEAPPSEQV1TOV2 := zkevm-sequencer-v1tov2
 DOCKERCOMPOSEAPPSEQSENDER := zkevm-sequence-sender
@@ -113,8 +113,8 @@ STOPMETRICS := $(DOCKERCOMPOSE) stop $(DOCKERCOMPOSEMETRICS) && $(DOCKERCOMPOSE)
 
 STOP := $(DOCKERCOMPOSE) down --remove-orphans
 
-RUNDACDB := docker-compose up -d zkevm-data-node-db
-STOPDACDB := docker-compose stop zkevm-data-node-db && docker-compose rm -f zkevm-data-node-db
+RUNDACDB := docker compose up -d zkevm-data-node-db
+STOPDACDB := docker compose stop zkevm-data-node-db && docker compose rm -f zkevm-data-node-db
 
 .PHONY: test-full-non-e2e
 test-full-non-e2e: stop ## Runs non-e2e tests checking race conditions
@@ -667,7 +667,7 @@ run-db-scripts: ## Executes scripts on the db after it has been initialized, pot
 
 .PHONY: install-mockery
 install-mockery: ## Installs mockery with the correct version to generate the mocks
-	go install github.com/vektra/mockery/v2@v2.39.0
+	go install github.com/vektra/mockery/v2@v2.40.2
 
 .PHONY: generate-mocks
 generate-mocks: generate-mocks-jsonrpc generate-mocks-sequencer generate-mocks-sequencesender generate-mocks-synchronizer generate-mocks-etherman generate-mocks-aggregator generate-mocks-state ## Generates mocks for the tests, using mockery tool

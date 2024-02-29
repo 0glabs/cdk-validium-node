@@ -3,6 +3,7 @@
 package etherman
 
 import (
+	dataavailability "github.com/0xPolygonHermez/zkevm-node/dataavailability"
 	common "github.com/ethereum/go-ethereum/common"
 
 	mock "github.com/stretchr/testify/mock"
@@ -13,9 +14,9 @@ type daMock struct {
 	mock.Mock
 }
 
-// GetBatchL2Data provides a mock function with given fields: batchNum, hash
-func (_m *daMock) GetBatchL2Data(batchNum uint64, hash common.Hash) ([]byte, error) {
-	ret := _m.Called(batchNum, hash)
+// GetBatchL2Data provides a mock function with given fields: batchNum, hash, requestParams
+func (_m *daMock) GetBatchL2Data(batchNum uint64, hash common.Hash, requestParams []dataavailability.BlobRequestParams) ([]byte, error) {
+	ret := _m.Called(batchNum, hash, requestParams)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetBatchL2Data")
@@ -23,24 +24,42 @@ func (_m *daMock) GetBatchL2Data(batchNum uint64, hash common.Hash) ([]byte, err
 
 	var r0 []byte
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uint64, common.Hash) ([]byte, error)); ok {
-		return rf(batchNum, hash)
+	if rf, ok := ret.Get(0).(func(uint64, common.Hash, []dataavailability.BlobRequestParams) ([]byte, error)); ok {
+		return rf(batchNum, hash, requestParams)
 	}
-	if rf, ok := ret.Get(0).(func(uint64, common.Hash) []byte); ok {
-		r0 = rf(batchNum, hash)
+	if rf, ok := ret.Get(0).(func(uint64, common.Hash, []dataavailability.BlobRequestParams) []byte); ok {
+		r0 = rf(batchNum, hash, requestParams)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]byte)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(uint64, common.Hash) error); ok {
-		r1 = rf(batchNum, hash)
+	if rf, ok := ret.Get(1).(func(uint64, common.Hash, []dataavailability.BlobRequestParams) error); ok {
+		r1 = rf(batchNum, hash, requestParams)
 	} else {
 		r1 = ret.Error(1)
 	}
 
 	return r0, r1
+}
+
+// GetDaBackendType provides a mock function with given fields:
+func (_m *daMock) GetDaBackendType() dataavailability.DABackendType {
+	ret := _m.Called()
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDaBackendType")
+	}
+
+	var r0 dataavailability.DABackendType
+	if rf, ok := ret.Get(0).(func() dataavailability.DABackendType); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(dataavailability.DABackendType)
+	}
+
+	return r0
 }
 
 // newDaMock creates a new instance of daMock. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

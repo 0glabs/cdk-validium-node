@@ -1303,12 +1303,7 @@ func decodeSequences(txData []byte, lastBatchNumber uint64, sequencer common.Add
 		if da.GetDaBackendType() == dataavailability.DataAvailabilityZg {
 			useZgDa = true
 
-			message, err := json.Marshal(data[2])
-			if err != nil {
-				return nil, err
-			}
-
-			err = rlp.DecodeBytes(message, &blobRequestParams)
+			err = rlp.DecodeBytes((data[2]).([]byte), &blobRequestParams)
 			if err != nil {
 				return nil, err
 			}
